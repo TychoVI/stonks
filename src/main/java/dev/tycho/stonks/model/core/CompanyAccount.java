@@ -3,10 +3,11 @@ package dev.tycho.stonks.model.core;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import dev.tycho.stonks.model.accountvisitors.IAccountVisitor;
+import lombok.Getter;
 
-@DatabaseTable(tableName = "companyaccount")
 public class CompanyAccount extends Account {
-  @DatabaseField
+
+  @Getter
   private double balance;
 
   public CompanyAccount() {

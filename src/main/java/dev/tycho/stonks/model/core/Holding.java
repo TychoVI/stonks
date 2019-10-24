@@ -1,46 +1,38 @@
 package dev.tycho.stonks.model.core;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
-import dev.tycho.stonks.database.HoldingDaoImpl;
+import lombok.Getter;
 
 import java.util.UUID;
 
 // A holding represents a share of an account held by a player
 // This is done by ratio ( share1 : share2 : ...) so percentages do not need to be saved
 // A player can withdraw as much money as is in the holding
-@DatabaseTable(tableName = "holding", daoClass = HoldingDaoImpl.class)
 public class Holding {
-  @DatabaseField(generatedId = true)
+
+  @Getter
   private int id;
-
-  @DatabaseField()
+  @Getter
   private UUID player;
-
-  @DatabaseField()
+  @Getter
   private double balance;
-
-  @DatabaseField()
+  @Getter
   private double share;
-
-  @DatabaseField(foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
-  private HoldingsAccount holdingsAccount = null;
+  @Getter
+  private int holdingsAccountId;
 
   public Holding() {
   }
 
-  public Holding(UUID player, double share, HoldingsAccount holdingsAccount) {
+  public Holding(int id, UUID playerUuid, double balance, double share, HoldingsAccount holdingsAccount) {
     if (share <= 0) {
       share = 1;
       System.out.println("Holding created with a 0 share");
     }
-    this.player = player;
+    this.id = id;
+    this.player = playerUuid;
+    this.balance = balance;
     this.share = share;
-    this.holdingsAccount = holdingsAccount;
-  }
-
-  public double getShare() {
-    return share;
+    this.holdingsAccountId = holdingsAccount.getId();
   }
 
   public boolean setShare(double share) {
@@ -61,18 +53,6 @@ public class Holding {
     if (balance < amount) return false;
     balance -= amount;
     return true;
-  }
-
-  public double getBalance() {
-    return balance;
-  }
-
-  public int getId() {
-    return id;
-  }
-
-  public UUID getPlayer() {
-    return player;
   }
 }
 

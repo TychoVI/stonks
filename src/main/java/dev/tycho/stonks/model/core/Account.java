@@ -1,43 +1,20 @@
 package dev.tycho.stonks.model.core;
 
-import com.j256.ormlite.field.DatabaseField;
 import dev.tycho.stonks.model.accountvisitors.IAccountVisitor;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.util.UUID;
 
+@AllArgsConstructor
 public abstract class Account {
-  @DatabaseField(generatedId = true)
+
+  @Getter
   private int id;
-
-  @DatabaseField
+  @Getter
   private UUID uuid;
-
-  @DatabaseField
+  @Getter
   private String name;
-
-  public Account() {
-  }
-
-  public Account(String name) {
-    this.name = name;
-    this.uuid = UUID.randomUUID();
-  }
-
-  public int getId() {
-    return id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public UUID getUuid() {
-    return uuid;
-  }
 
   public abstract void addBalance(double amount);
 
