@@ -270,7 +270,7 @@ public class ShopManager extends SpigotModule {
     }
     try {
       for (Member member : databaseManager.getAccountLinkDao().queryForId(Integer.valueOf(event.getTransactionEvent().getOwnerAccount().getName().split("-")[0].replaceFirst("#", ""))).getCompany().getMembers()) {
-        if (member.hasManagamentPermission()) {
+        if (member.hasManagementPermission()) {
           Player player = DatabaseHelper.getInstance().getEssentials().getUser(member.getUuid()).getBase();
           if (player.isOnline()) {
             event.addTarget(player);
@@ -290,7 +290,7 @@ public class ShopManager extends SpigotModule {
     }
     try {
       for (Member member : databaseManager.getAccountLinkDao().queryForId(Integer.valueOf(event.getTransactionEvent().getOwnerAccount().getName().split("-")[0].replaceFirst("#", ""))).getCompany().getMembers()) {
-        if (member.hasManagamentPermission()) {
+        if (member.hasManagementPermission()) {
           OfflinePlayer player = Bukkit.getOfflinePlayer(member.getUuid());
           if (player.isOnline()) {
             event.addTarget(player.getPlayer());

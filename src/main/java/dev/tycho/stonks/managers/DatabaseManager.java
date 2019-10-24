@@ -4,10 +4,7 @@ import dev.tycho.stonks.Stonks;
 import dev.tycho.stonks.command.MainCommand;
 import dev.tycho.stonks.database.*;
 import dev.tycho.stonks.model.accountvisitors.IAccountVisitor;
-import dev.tycho.stonks.model.core.Account;
-import dev.tycho.stonks.model.core.CompanyAccount;
-import dev.tycho.stonks.model.core.Holding;
-import dev.tycho.stonks.model.core.HoldingsAccount;
+import dev.tycho.stonks.model.core.*;
 import dev.tycho.stonks.model.logging.Transaction;
 import dev.tycho.stonks.model.service.Service;
 import lombok.Getter;
@@ -25,6 +22,8 @@ public class DatabaseManager extends SpigotModule {
   private Connection connection;
   @Getter
   private CompanyManager companyManager;
+  @Getter
+  private MemberManager memberManager;
 
   public DatabaseManager(Stonks plugin) {
     super("databaseManager", plugin);
@@ -56,7 +55,7 @@ public class DatabaseManager extends SpigotModule {
         connection.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS `transaction` (`id` int(11) NOT NULL AUTO_INCREMENT, `account_id` int(11) DEFAULT NULL, `payee` varchar(48) DEFAULT NULL, `amount` double DEFAULT NULL, `timestamp` datetime DEFAULT NULL, `message` varchar(255) DEFAULT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB AUTO_INCREMENT=11402 DEFAULT CHARSET=utf8mb4;");
         log("Initialized Tables!");
         companyManager = new CompanyManager(this);
-
+        memberManager = new MemberManager(this, companyManager);
       }
     } catch (SQLException | ClassNotFoundException e) {
       e.printStackTrace();

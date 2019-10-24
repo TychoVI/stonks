@@ -81,7 +81,7 @@ public class CompanyManager {
     return companies;
   }
 
-  private Company getCompanyFromId(UUID uuid) throws SQLException {
+  public Company getCompanyFromId(UUID uuid) throws SQLException {
     PreparedStatement statement = connection.prepareStatement("SELECT * FROM `company` WHERE uuid = ?;");
     statement.setString(1, uuid.toString());
     ResultSet set = statement.executeQuery();
