@@ -82,10 +82,6 @@ public class DatabaseManager extends SpigotModule {
     }
   }
 
-  public MemberDao getMemberDao() {
-    return memberDao;
-  }
-
   public AccountLinkDaoImpl getAccountLinkDao() {
     return accountlinkDao;
   }
