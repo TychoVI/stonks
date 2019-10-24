@@ -2,35 +2,27 @@ package dev.tycho.stonks.model.service;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.bukkit.entity.Player;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.UUID;
 
-@DatabaseTable(tableName = "subscription")
+@AllArgsConstructor
 public class Subscription {
-  @DatabaseField(generatedId = true)
+
+  @Getter
   private int id;
-
-  @DatabaseField(foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
-  private Service service;
-
-  @DatabaseField
+  @Getter
+  private int serviceId;
+  @Getter
   private UUID playerId;
-
-  @DatabaseField
-  private Timestamp lastPaymentDate;
-
-
-  public Subscription() {
-  }
-
-  public Subscription(Player player, Service service) {
-    this.playerId = player.getUniqueId();
-    this.service = service;
-    this.lastPaymentDate = new Timestamp(Calendar.getInstance().getTime().getTime());
-  }
+  @Getter
+  private Date lastPaymentDate;
 
   public boolean isOverdue() {
     return (getDaysOverdue() > 0);
@@ -42,29 +34,7 @@ public class Subscription {
     return ((double) millisDifference / 86400000) - service.getDuration();
   }
 
-
   public void registerPaid() {
     this.lastPaymentDate = new Timestamp(Calendar.getInstance().getTime().getTime());
   }
-
-  //Getters
-
-  public int getId() {
-    return id;
-  }
-
-  public Service getService() {
-    return service;
-  }
-
-  public UUID getPlayerId() {
-    return playerId;
-  }
-
-  public Timestamp getLastPaymentDate() {
-    return lastPaymentDate;
-  }
-
-
-
 }

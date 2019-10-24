@@ -7,6 +7,7 @@ import dev.tycho.stonks.model.accountvisitors.IAccountVisitor;
 import dev.tycho.stonks.model.core.*;
 import dev.tycho.stonks.model.logging.Transaction;
 import dev.tycho.stonks.model.service.Service;
+import dev.tycho.stonks.model.service.Subscription;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -24,6 +25,8 @@ public class DatabaseManager extends SpigotModule {
   private CompanyManager companyManager;
   @Getter
   private MemberManager memberManager;
+  @Getter
+  private SubscriptionManager subscriptionManager;
 
   public DatabaseManager(Stonks plugin) {
     super("databaseManager", plugin);
@@ -56,6 +59,7 @@ public class DatabaseManager extends SpigotModule {
         log("Initialized Tables!");
         companyManager = new CompanyManager(this);
         memberManager = new MemberManager(this, companyManager);
+        subscriptionManager = new SubscriptionManager(this);
       }
     } catch (SQLException | ClassNotFoundException e) {
       e.printStackTrace();
