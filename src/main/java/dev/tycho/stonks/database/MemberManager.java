@@ -79,4 +79,23 @@ public class MemberManager {
     statement.setString(3, member.getCompany().getId().toString());
     statement.executeUpdate();
   }
+
+  public List<Member> getCompanyMembers(Company company) {
+    List<Member> members = new ArrayList<>();
+    try {
+      PreparedStatement statement = connection.prepareStatement("SELECT * FROM `member` WHERE company_id = ?;");
+      statement.setString(1, company.getId().toString());
+      ResultSet set = statement.executeQuery();
+      while (set.next()) {
+        members.add(new Member(UUID.fromString("uuid"),
+            company,
+            set.getDate("joinDate"),
+            Role.valueOf(set.getString("role")),
+            set.getInt("acceptedInvite") == 1));
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return members;
+  }
 }

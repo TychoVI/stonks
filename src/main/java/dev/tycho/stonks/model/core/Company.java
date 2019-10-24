@@ -1,15 +1,8 @@
 package dev.tycho.stonks.model.core;
 
-import com.j256.ormlite.dao.ForeignCollection;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.ForeignCollectionField;
-import com.j256.ormlite.table.DatabaseTable;
-import dev.tycho.stonks.database.CompanyDaoImpl;
 import dev.tycho.stonks.managers.DatabaseManager;
-import dev.tycho.stonks.model.service.Service;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
@@ -18,6 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Company {
 
+  private DatabaseManager databaseManager;
   @Getter
   private UUID id;
   @Getter
@@ -31,18 +25,19 @@ public class Company {
   private boolean hidden;
 
   public Member getMember(Player player) {
-    for (Member member : members) {
-      if (member.getUuid().equals(player.getUniqueId())) {
-        return member;
-      }
+    try {
+      return databaseManager.getMemberManager().getMember(player, this);
+    } catch (SQLException e) {
+      return null;
     }
-    return null;
   }
 
   public int getNumAcceptedMembers() {
     int m = 0;
-    for (Member member : members) {
-      if (member.getAcceptedInvite()) m++;
+    for (Member member : databaseManager.getMemberManager().getCompanyMembers(this)) {
+      if (member.isAcceptedInvite()) {
+        m++;
+      }
     }
     return m;
   }
@@ -63,12 +58,7 @@ public class Company {
   }
 
 
-  public Boolean hasMember(Player player) {
-    for (Member member : members) {
-      if (member.getUuid().equals(player.getUniqueId())) {
-        return true;
-      }
-    }
-    return false;
+  public boolean hasMember(Player player) {
+    return getMember(player) != null;
   }
 }

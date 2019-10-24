@@ -16,9 +16,11 @@ import java.util.UUID;
 
 public class CompanyManager {
 
+  private final DatabaseManager databaseManager;
   private final Connection connection;
 
   public CompanyManager(DatabaseManager databaseManager) {
+    this.databaseManager = databaseManager;
     this.connection = databaseManager.getConnection();
   }
 
@@ -39,7 +41,8 @@ public class CompanyManager {
     statement.setString(1, name);
     ResultSet set = statement.executeQuery();
     set.next();
-    return new Company(UUID.fromString(set.getString("id")),
+    return new Company(databaseManager,
+        UUID.fromString(set.getString("id")),
         set.getString("name"),
         set.getString("shopName"),
         set.getString("logoMaterial"),
@@ -52,7 +55,8 @@ public class CompanyManager {
     try {
       ResultSet set = connection.createStatement().executeQuery("SELECT * FROM `company` ORDER BY name;");
       while (set.next()) {
-        companies.add(new Company(UUID.fromString(set.getString("id")),
+        companies.add(new Company(databaseManager,
+            UUID.fromString(set.getString("id")),
             set.getString("name"),
             set.getString("shopName"),
             set.getString("logoMaterial"),
@@ -86,7 +90,8 @@ public class CompanyManager {
     statement.setString(1, uuid.toString());
     ResultSet set = statement.executeQuery();
     set.next();
-    return new Company(UUID.fromString(set.getString("id")),
+    return new Company(databaseManager,
+        UUID.fromString(set.getString("id")),
         set.getString("name"),
         set.getString("shopName"),
         set.getString("logoMaterial"),
