@@ -1,0 +1,22 @@
+image: java:8-jdk
+
+stages:
+- build
+
+before_script:
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+    - chmod a+x ./gradlew
+cache:
+    paths:
+    - .gradle/wrapper
+    - .gradle/caches
+
+build:
+    stage: build
+    script:
+    - ./gradlew shadowJar
+    - cp build/libs/*-all.jar .
+    artifacts:
+        paths:
+            - ./*-all.jar
+        expire_in: 1 month
