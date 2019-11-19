@@ -7,7 +7,6 @@ import dev.tycho.stonks.model.accountvisitors.IAccountVisitor;
 
 import java.util.UUID;
 
-@DatabaseTable(tableName = "holdingsaccount")
 public class HoldingsAccount extends Account {
 
   @ForeignCollectionField(eager = true)

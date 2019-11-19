@@ -1,62 +1,25 @@
 package dev.tycho.stonks.model.core;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
-import dev.tycho.stonks.database.MemberDaoImpl;
 import dev.tycho.stonks.managers.DatabaseManager;
-import org.bukkit.entity.Player;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.util.Date;
 import java.util.UUID;
 
-@DatabaseTable(tableName = "member", daoClass = MemberDaoImpl.class)
+@AllArgsConstructor
 public class Member {
 
-  @DatabaseField(uniqueCombo = true)
+  @Getter
   private UUID uuid;
-
-  @DatabaseField(foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true, uniqueCombo = true)
+  @Getter
   private Company company;
-
-  @DatabaseField
+  @Getter
   private Date joinDate;
-
-  @DatabaseField
+  @Getter
   private Role role;
-
-  @DatabaseField
+  @Getter
   private boolean acceptedInvite;
-
-  public Member() {
-
-  }
-
-  public Member(Player player, Role role) {
-    this.uuid = player.getUniqueId();
-    this.role = role;
-    this.joinDate = new Date();
-    this.acceptedInvite = true;
-  }
-
-  public Member(Player player, Role role, Company company) {
-    this.uuid = player.getUniqueId();
-    this.role = role;
-    this.company = company;
-    this.joinDate = new Date();
-    this.acceptedInvite = false;
-  }
-
-  public UUID getUuid() {
-    return uuid;
-  }
-
-  public Role getRole() {
-    return role;
-  }
-
-  public void setRole(Role role) {
-    this.role = role;
-  }
 
   public boolean canChangeRole(Member other, Role newRole) {
     //We are the same role or superior to them
@@ -67,20 +30,7 @@ public class Member {
     }
     return false;
   }
-
-  public Company getCompany() {
-    return company;
-  }
-
-  public boolean getAcceptedInvite() {
-    return acceptedInvite;
-  }
-
-  public void setAcceptedInvite(boolean acceptedInvite) {
-    this.acceptedInvite = acceptedInvite;
-  }
-
-  public Boolean hasManagamentPermission() {
+  public Boolean hasManagementPermission() {
     return this.role.equals(Role.CEO) || this.role.equals(Role.Manager);
   }
 

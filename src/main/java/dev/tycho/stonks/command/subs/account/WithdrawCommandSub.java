@@ -58,7 +58,7 @@ public class WithdrawCommandSub extends CommandSub {
       boolean remove = true;
       Company c = list.get(i);
       Member m = c.getMember(player);
-      if (m != null && m.hasManagamentPermission()) {
+      if (m != null && m.hasManagementPermission()) {
         //If a manager or ceo
         remove = false;
       }

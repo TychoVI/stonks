@@ -4,7 +4,6 @@ mysql:
   database: YOUR-DATABASE
   username: YOUR-USERNAME
   password: YOUR-PASSWORD
-  ssl: false
 
 fees:
   companycreation: 10000

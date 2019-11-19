@@ -246,7 +246,7 @@ public class DatabaseHelper extends SpigotModule {
               sendMessage(player, "You don't have permission to do that!");
               return;
             }
-            if (!companies.get(0).getMember(player).hasManagamentPermission()) {
+            if (!companies.get(0).getMember(player).hasManagementPermission()) {
               sendMessage(player, "You don't have permission to do that!");
               return;
             }
@@ -294,7 +294,7 @@ public class DatabaseHelper extends SpigotModule {
               sendMessage(player, "You are not a member of this company!");
               return;
             }
-            if (!member.hasManagamentPermission()) {
+            if (!member.hasManagementPermission()) {
               sendMessage(player, "You don't have permission to preform this action. Ask for a promotion!");
               return;
             }
@@ -353,7 +353,7 @@ public class DatabaseHelper extends SpigotModule {
               return;
             }
             //Does the player have permission to create a holding in that account?
-            if (!member.hasManagamentPermission()) {
+            if (!member.hasManagementPermission()) {
               sendMessage(player, "You do not have permission to create a holding account! Ask to be promoted.");
               return;
             }
@@ -407,7 +407,7 @@ public class DatabaseHelper extends SpigotModule {
               return;
             }
             //Does the player have permission to create a holding in that account?
-            if (!member.hasManagamentPermission()) {
+            if (!member.hasManagementPermission()) {
               sendMessage(player, "You do not have permission to create a holding account! Ask to be promoted.");
               return;
             }
@@ -473,7 +473,7 @@ public class DatabaseHelper extends SpigotModule {
               @Override
               public void visit(CompanyAccount a) {
                 //With a company account we need to verify they have withdraw permission
-                if (member.hasManagamentPermission()) {
+                if (member.hasManagementPermission()) {
                   if (a.getTotalBalance() >= amount) {
                     a.subtractBalance(amount);
                     try {
@@ -619,7 +619,7 @@ public class DatabaseHelper extends SpigotModule {
 
           //Send a message to all managers in the company that are online that the company got paid
           for (Member member : accountLink.getCompany().getMembers()) {
-            if (member.hasManagamentPermission()) {
+            if (member.hasManagementPermission()) {
               Player u = essentials.getUser(member.getUuid()).getBase();
               if (!u.getName().equalsIgnoreCase(sender.getName()) && u.isOnline()) {
                 sendMessage(u, sender.getDisplayName() + ChatColor.GREEN + " paid " + ChatColor.YELLOW + " " + accountLink.getCompany().getName() + " (" + accountLink.getAccount().getName() + ") $" + Util.commify(amount));
@@ -881,7 +881,7 @@ public class DatabaseHelper extends SpigotModule {
 
   public void changeServiceMaxSubs(Player player, int maxSubs, Service service) {
     Member m = service.getCompany().getMember(player);
-    if (m == null || !m.hasManagamentPermission()) {
+    if (m == null || !m.hasManagementPermission()) {
       sendMessage(player, "You don't have management perms for this company");
       return;
     }

@@ -45,7 +45,7 @@ public class ServicesListGui extends CollectionGuiBase<Service> {
     //Two different sets of actions based on the role of the player in the company
     Member m = obj.getCompany().getMember(player);
     //If the player isnt a manager then allow them to subscribe
-    if (m == null || !m.hasManagamentPermission()) {
+    if (m == null || !m.hasManagementPermission()) {
       //If the player is subscribed tell them, and dont let them subscribe
       if (obj.getSubscription(player) != null) {
         return ClickableItem.of(ItemInfoHelper.serviceDisplayItem(obj,

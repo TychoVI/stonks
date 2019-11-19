@@ -47,7 +47,7 @@ public abstract class SpigotModule implements Listener {
 
   }
 
-  private void log(String message) {
+  protected void log(String message) {
     System.out.println("[Stonks] " + moduleName + "> " + message);
   }
 

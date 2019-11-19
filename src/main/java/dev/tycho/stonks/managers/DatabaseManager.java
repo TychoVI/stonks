@@ -1,11 +1,5 @@
 package dev.tycho.stonks.managers;
 
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.jdbc.JdbcConnectionSource;
-import com.j256.ormlite.logger.LocalLog;
-import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.table.TableUtils;
 import dev.tycho.stonks.Stonks;
 import dev.tycho.stonks.command.MainCommand;
 import dev.tycho.stonks.database.*;
@@ -14,26 +8,25 @@ import dev.tycho.stonks.model.core.*;
 import dev.tycho.stonks.model.logging.Transaction;
 import dev.tycho.stonks.model.service.Service;
 import dev.tycho.stonks.model.service.Subscription;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
-import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.UUID;
 
 public class DatabaseManager extends SpigotModule {
 
-  private JdbcConnectionSource connectionSource = null;
-  private CompanyDao companyDao = null;
-  private MemberDao memberDao = null;
-  private CompanyAccountDao companyAccountDao = null;
-  private AccountLinkDaoImpl accountlinkDao = null;
-  private HoldingDaoImpl holdingDao = null;
-  private HoldingsAccountDaoImpl holdingAccountDao = null;
-  private TransactionDaoImpl transactionDao = null;
-  private Dao<Service, Integer> serviceDao = null;
-  private SubscriptionDaoImpl subscriptionDao = null;
-
+  @Getter
+  private Connection connection;
+  @Getter
+  private CompanyManager companyManager;
+  @Getter
+  private MemberManager memberManager;
+  @Getter
+  private SubscriptionManager subscriptionManager;
 
   public DatabaseManager(Stonks plugin) {
     super("databaseManager", plugin);
@@ -41,41 +34,37 @@ public class DatabaseManager extends SpigotModule {
 
   @Override
   public void enable() {
-    System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR");
-
-    String host = plugin.getConfig().getString("mysql.host");
-    String port = plugin.getConfig().getString("mysql.port");
-    String database = plugin.getConfig().getString("mysql.database");
-    String username = plugin.getConfig().getString("mysql.username");
-    String password = plugin.getConfig().getString("mysql.password");
-    String useSsl = plugin.getConfig().getString("mysql.ssl");
-
-    String databaseUrl = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT&useSSL=" + useSsl;
-
     try {
-      connectionSource = new JdbcConnectionSource(databaseUrl, username, password);
-      companyDao = DaoManager.createDao(connectionSource, Company.class);
-      memberDao = DaoManager.createDao(connectionSource, Member.class);
-      companyAccountDao = new CompanyAccountDaoImpl(connectionSource);
-      accountlinkDao = new AccountLinkDaoImpl(connectionSource);
-      holdingDao = DaoManager.createDao(connectionSource, Holding.class);
-      holdingAccountDao = new HoldingsAccountDaoImpl(connectionSource);
-      transactionDao = new TransactionDaoImpl(connectionSource);
-      subscriptionDao = new SubscriptionDaoImpl(connectionSource);
-      serviceDao = DaoManager.createDao(connectionSource, Service.class);
-
-
-      TableUtils.createTableIfNotExists(connectionSource, Company.class);
-      TableUtils.createTableIfNotExists(connectionSource, Member.class);
-      TableUtils.createTableIfNotExists(connectionSource, AccountLink.class);
-      TableUtils.createTableIfNotExists(connectionSource, CompanyAccount.class);
-      TableUtils.createTableIfNotExists(connectionSource, Holding.class);
-      TableUtils.createTableIfNotExists(connectionSource, HoldingsAccount.class);
-      TableUtils.createTableIfNotExists(connectionSource, Transaction.class);
-      TableUtils.createTableIfNotExists(connectionSource, Service.class);
-      TableUtils.createTableIfNotExists(connectionSource, Subscription.class);
-    } catch (SQLException e) {
+      synchronized (this) {
+        if (connection != null && !connection.isClosed()) {
+          return;
+        }
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        connection = DriverManager.getConnection(
+            "jdbc:mysql://" + plugin.getConfig().getString("mysql.host") + ":" + plugin.getConfig().getString("mysql.port")
+                + "/" + plugin.getConfig().getString("mysql.database")
+                + "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT",
+            plugin.getConfig().getString("mysql.username"),
+            plugin.getConfig().getString("mysql.password"));
+        log("Connected to SQL!");
+        connection.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS `accountlink` (`id` int(11) NOT NULL AUTO_INCREMENT, `company_id` varchar(48) DEFAULT NULL, `companyAccount_id` int(11) DEFAULT NULL, `holdingsAccount_id` int(11) DEFAULT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB AUTO_INCREMENT=171 DEFAULT CHARSET=utf8mb4;");
+        connection.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS `company` (`id` varchar(48) NOT NULL, `name` varchar(255) DEFAULT NULL, `shopName` varchar(255) DEFAULT NULL, `logoMaterial` varchar(255) DEFAULT NULL, `verified` tinyint(1) NOT NULL DEFAULT '0', `hidden` tinyint(1) NOT NULL DEFAULT '0', PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+        connection.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS `companyaccount` (`balance` double DEFAULT NULL, `id` int(11) NOT NULL AUTO_INCREMENT, `uuid` varchar(48) DEFAULT NULL, `name` varchar(255) DEFAULT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB AUTO_INCREMENT=142 DEFAULT CHARSET=utf8mb4;");
+        connection.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS `holding` (`id` int(11) NOT NULL AUTO_INCREMENT, `player` varchar(48) DEFAULT NULL, `balance` double DEFAULT NULL, `share` double DEFAULT NULL, `holdingsAccount_id` int(11) DEFAULT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb4;");
+        connection.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS `holdingsaccount` (`id` int(11) NOT NULL AUTO_INCREMENT, `uuid` varchar(48) DEFAULT NULL, `name` varchar(255) DEFAULT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4;");
+        connection.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS `member` (`uuid` varchar(48) DEFAULT NULL, `company_id` varchar(48) DEFAULT NULL, `joinDate` datetime DEFAULT NULL, `role` varchar(100) DEFAULT NULL, `acceptedInvite` tinyint(1) DEFAULT NULL, UNIQUE KEY `uuid` (`uuid`,`company_id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+        connection.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS `service` (`id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(255) DEFAULT NULL, `duration` double DEFAULT NULL, `cost` double DEFAULT NULL, `maxSubscribers` int(11) DEFAULT NULL, `company_id` varchar(48) DEFAULT NULL, `account_id` int(11) DEFAULT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8mb4;");
+        connection.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS `subscription` (`id` int(11) NOT NULL AUTO_INCREMENT, `service_id` int(11) DEFAULT NULL, `playerId` varchar(48) DEFAULT NULL, `lastPaymentDate` datetime DEFAULT NULL, `autoPay` tinyint(1) DEFAULT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4;");
+        connection.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS `transaction` (`id` int(11) NOT NULL AUTO_INCREMENT, `account_id` int(11) DEFAULT NULL, `payee` varchar(48) DEFAULT NULL, `amount` double DEFAULT NULL, `timestamp` datetime DEFAULT NULL, `message` varchar(255) DEFAULT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB AUTO_INCREMENT=11402 DEFAULT CHARSET=utf8mb4;");
+        log("Initialized Tables!");
+        companyManager = new CompanyManager(this);
+        memberManager = new MemberManager(this, companyManager);
+        subscriptionManager = new SubscriptionManager(this);
+      }
+    } catch (SQLException | ClassNotFoundException e) {
       e.printStackTrace();
+      log("Error connecting to the SQL Database: " + e.getMessage());
+      return;
     }
 
     new DatabaseHelper(plugin, this);
@@ -85,23 +74,16 @@ public class DatabaseManager extends SpigotModule {
   public void addCommands() {
     MainCommand command = new MainCommand();
     addCommand("company", command);
+    //noinspection ConstantConditions
     plugin.getCommand("company").setTabCompleter(command);
   }
 
   @Override
   public void disable() {
     try {
-      connectionSource.close();
-    } catch (IOException ignored) {
+      connection.close();
+    } catch (SQLException ignored) {
     }
-  }
-
-  public CompanyDao getCompanyDao() {
-    return companyDao;
-  }
-
-  public MemberDao getMemberDao() {
-    return memberDao;
   }
 
   public AccountLinkDaoImpl getAccountLinkDao() {
@@ -202,7 +184,7 @@ public class DatabaseManager extends SpigotModule {
           //Update the account and holdings
           getHoldingAccountDao().update(a);
           if (a.getHoldings() != null)
-          for (Holding h : a.getHoldings()) if (h != null) getHoldingDao().update(h);
+            for (Holding h : a.getHoldings()) if (h != null) getHoldingDao().update(h);
         } catch (SQLException e) {
           e.printStackTrace();
         }
